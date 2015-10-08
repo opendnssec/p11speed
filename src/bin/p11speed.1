@@ -1,0 +1,34 @@
+.TH P11SPEED 1 "8 October 2015" "p11speed"
+.SH NAME
+p11speed \- Speed test for PKCS#11
+.SH SYNOPSIS
+.B p11speed
+.SH DESCRIPTION
+.B p11speed
+is a tool for benchmarking the performance on PKCS#11
+libraries.
+.SH ACTIONS
+.TP
+.B \-\-help\fR, \fB\-h\fR
+Show the help information.
+.TP
+.B \-\-version\fR, \fB\-v\fR
+Show the version info.
+.SH OPTIONS
+.TP
+.B \-\-module \fIpath\fR
+Use another PKCS#11 library than SoftHSM.
+.TP
+.B \-\-pin \fIPIN\fR
+The
+.I PIN
+for the normal user.
+.TP
+.B \-\-slot \fInumber\fR
+The slot where the token is located.
+.SH EXAMPLES
+.LP
+Some examples
+.SH AUTHORS
+Written by Rickard Bellgrim.
+.LP
