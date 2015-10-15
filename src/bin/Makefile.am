@@ -13,5 +13,6 @@ p11speed_SOURCES =	p11speed.cpp \
 			library.cpp
 p11speed_LDADD =	-lpthread
 
-EXTRA_DIST =		$(srcdir)/*.h \
+EXTRA_DIST =		$(srcdir)/cryptoki_compat/*.h \
+			$(srcdir)/*.h \
 			$(srcdir)/*.cpp
