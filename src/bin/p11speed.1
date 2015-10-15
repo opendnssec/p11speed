@@ -1,0 +1,85 @@
+.TH P11SPEED 1 "8 October 2015" "p11speed"
+.SH NAME
+p11speed \- Speed test for PKCS#11
+.SH SYNOPSIS
+.B p11speed \-\-show\-slots
+.PP
+.B p11speed \-\-sign
+.B \-\-slot
+.I number
+.RB [ \-\-pin
+.IR PIN ]
+.B \-\-mechanism
+.I name
+.RB [ \-\-keysize
+.IR bits ]
+.B \-\-threads
+.I number
+.B \-\-iterations
+.I number
+.SH DESCRIPTION
+.B p11speed
+is a tool for benchmarking the performance of PKCS#11
+libraries.
+.SH ACTIONS
+.TP
+.B \-\-help\fR, \fB\-h\fR
+Show the help information.
+.TP
+.B \-\-sign
+Benchmarks the performance of signature operation using
+C_SignInit() and C_Sign(). The signatures are created using
+pre-defined hash values.
+.br
+Use with
+.BR \-\-slot ,
+.BR \-\-pin ,
+.BR \-\-mechanism ,
+.BR \-\-keysize ,
+.BR \-\-threads ,
+and
+.BR \-\-iterations .
+.TP
+.B \-\-show\-slots
+Display all the available slots and their current status.
+.TP
+.B \-\-version\fR, \fB\-v\fR
+Show the version info.
+.SH OPTIONS
+.TP
+.B \-\-iterations \fInumber\fR
+The number of iterations per thread.
+A higher number of iterations will increase the performance.
+.TP
+.B \-\-keysize \fIbits\fR
+A temporary key with the given key size will be generated.
+Note that GOST has a fixed key size and that ECDSA has two supported curves,
+P\-256 and P\-384. In the case of ECDSA, use 256 or 384 as the key size.
+.TP
+.B \-\-mechanism \fIname\fR
+The name of the mechanism that will be used for the cryptographic operation.
+Available mechanisms and their key size:
+.br
+* RSA_PKCS  [1024\-4096]
+.br
+* DSA       [1024\-4096]
+.br
+* ECDSA     [256,384]
+.br
+* GOSTR3410
+.TP
+.B \-\-module \fIpath\fR
+Use another PKCS#11 library than SoftHSM.
+.TP
+.B \-\-pin \fIPIN\fR
+The PIN for the normal user.
+.TP
+.B \-\-slot \fInumber\fR
+The slot where the token is located.
+.TP
+.B \-\-threads \fInumber\fR
+The number of threads to use.
+Most HSMs will be utilized better with multiple threads.
+.SH AUTHORS
+Written by Rickard Bellgrim.
+.LP
