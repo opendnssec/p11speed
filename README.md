@@ -74,21 +74,19 @@ All the available slots and their current status can be listed using this comman
 
 ### Signature operations
 
-Benchmarks the performance of signature operation using C_SignInit() and
+Benchmark the performance of signature operation using C_SignInit() and
 C_Sign(). The signatures are created using pre-defined hash values.
 
 A temporary key with a given key size will be generated. Note that GOST has a
 fixed key size and that ECDSA has two supported curves, P-256 and P-384. In the
 case of ECDSA, use 256 or 384 as the key size.
 
-Available mechanisms and their key size:
-- RSA_PKCS
-    * 1024 - 4096
-- DSA
-    * 1024 - 4096
-- ECDSA
-    * 256, 384
-- GOSTR3410
-
 	p11speed --sign --slot <number> [--pin <PIN>] --mechanism <name>
 		[--keysize <bits>] --threads <number> --iterations <number>
+
+Available mechanisms and their key size:
+
+- RSA_PKCS (1024 - 4096)
+- DSA (1024 - 4096)
+- ECDSA (256, 384)
+- GOSTR3410
