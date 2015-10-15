@@ -37,14 +37,43 @@
 #include "pkcs11.h"
 
 // Main functions
-
 void usage();
 int showSlots();
+int testSign(unsigned int slot, char* userPIN, char* mechanism, char* keysize, unsigned int threads, unsigned int iterations);
 
-// Support functions
+// Key generation
+int generateRsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE &hPuk, CK_OBJECT_HANDLE &hPrk);
+int generateDsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE &hPuk, CK_OBJECT_HANDLE &hPrk);
+int generateEcdsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE &hPuk, CK_OBJECT_HANDLE &hPrk);
+int generateGost(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE &hPuk, CK_OBJECT_HANDLE &hPrk);
 
-/// Library
+// Work items for threads
+void* sign(void* arg);
+
+// Library
 static void* moduleHandle;
 extern CK_FUNCTION_LIST_PTR p11;
+
+#define PTHREAD_THREADS_MAX 2048
+
+struct HashAlgo
+{
+        enum Type
+        {
+                Unknown,
+                SHA256,
+                SHA384,
+                GOST
+        };
+};
+
+typedef struct {
+	unsigned int id;
+	unsigned int iterations;
+	CK_SESSION_HANDLE hSession;
+	CK_OBJECT_HANDLE hPrivateKey;
+	CK_MECHANISM_TYPE mechanismType;
+	HashAlgo::Type hashType;
+} sign_arg_t;
 
 #endif // !_P11SPEED_H
