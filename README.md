@@ -2,6 +2,8 @@
 
 p11speed is part of the SoftHSM project, but can be used with other HSMs.
 
+[![Build Status](https://api.travis-ci.org/opendnssec/p11speed.png)](https://travis-ci.org/opendnssec/p11speed)
+
 ## Introduction
 
 This program is made to benchmark the performance of PKCS#11 enabled devices.
