@@ -632,7 +632,7 @@ int generateRsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE &
 		{ CKA_VERIFY,          &bTrue,    sizeof(bTrue)   },
 		{ CKA_ENCRYPT,         &bFalse,   sizeof(bFalse)  },
 		{ CKA_WRAP,            &bFalse,   sizeof(bFalse)  },
-		{ CKA_TOKEN,           &bTrue,    sizeof(bTrue)  },
+		{ CKA_TOKEN,           &bTrue,    sizeof(bTrue)   },
 		{ CKA_MODULUS_BITS,    &keysize,  sizeof(keysize) },
 		{ CKA_PUBLIC_EXPONENT, &pubExp,   sizeof(pubExp)  }
 	};
@@ -645,7 +645,7 @@ int generateRsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE &
 		{ CKA_DECRYPT,     &bFalse,   sizeof(bFalse)  },
 		{ CKA_UNWRAP,      &bFalse,   sizeof(bFalse)  },
 		{ CKA_SENSITIVE,   &bTrue,    sizeof(bTrue)   },
-		{ CKA_TOKEN,       &bTrue,    sizeof(bTrue)  },
+		{ CKA_TOKEN,       &bTrue,    sizeof(bTrue)   },
 		{ CKA_PRIVATE,     &bTrue,    sizeof(bTrue)   },
 		{ CKA_EXTRACTABLE, &bFalse,   sizeof(bFalse)  }
 	};
