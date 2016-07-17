@@ -51,7 +51,8 @@ int generateGost(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE &hPuk, CK_OBJECT_H
 void* sign(void* arg);
 
 // Logging
-void log_verbose(const char* format, ...);
+void log_notice(const char* format, ...);
+void log_error(const char* format, ...);
 
 // Library
 static void* moduleHandle;
