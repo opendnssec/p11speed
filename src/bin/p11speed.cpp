@@ -435,6 +435,8 @@ int testSign
 		return 1;
 	}
 
+	gettimeofday(&start, NULL);
+
 	// Generate key
 	if (strcmp(mechanism, "RSA_PKCS") == 0)
 	{
@@ -521,6 +523,12 @@ int testSign
 	}
 
 	if (result != 0) return result;
+
+	gettimeofday(&end, NULL);
+	end.tv_sec -= start.tv_sec;
+	end.tv_usec-= start.tv_usec;
+	elapsed =(double)(end.tv_sec)+(double)(end.tv_usec)*.000001;
+	printf("Key generation took %.2f seconds.\n", elapsed);
 
 	/* Prepare threads */
 	pthread_attr_init(&thread_attr);
