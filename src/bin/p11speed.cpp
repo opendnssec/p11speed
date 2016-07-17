@@ -50,6 +50,8 @@
 #include <fstream>
 #include <pthread.h>
 
+unsigned int verbose;
+
 // Display the usage
 void usage()
 {
@@ -77,6 +79,7 @@ void usage()
 	printf("  --pin <PIN>        The PIN for the normal user.\n");
 	printf("  --slot <number>    The slot where the token is located.\n");
 	printf("  --threads <number> The number of threads.\n");
+	printf("  --verbose          Verbose output.\n");
 }
 
 // Enumeration of the long options
@@ -91,6 +94,7 @@ enum {
 	OPT_SIGN,
 	OPT_SLOT,
 	OPT_THREADS,
+	OPT_VERBOSE,
 	OPT_VERSION
 };
 
@@ -106,6 +110,7 @@ static const struct option long_options[] = {
 	{ "sign",            0, NULL, OPT_SIGN },
 	{ "slot",            1, NULL, OPT_SLOT },
 	{ "threads",         1, NULL, OPT_THREADS },
+	{ "verbose",         0, NULL, OPT_VERBOSE },
 	{ "version",         0, NULL, OPT_VERSION },
 	{ NULL,              0, NULL, 0 }
 };
@@ -167,6 +172,9 @@ int main(int argc, char* argv[])
 				break;
 			case OPT_THREADS:
 				threads = optarg;
+				break;
+			case OPT_VERBOSE:
+				verbose = 1;
 				break;
 			case OPT_VERSION:
 			case 'v':
@@ -974,4 +982,16 @@ void* sign (void* arg)
 	fprintf(stderr, "Signer thread #%d done.\n", id);
 
 	pthread_exit(NULL);
+}
+
+void log_verbose (const char* format, ...)
+{
+	if (verbose) {
+		fprintf(stderr, "%ld: ", time(NULL));
+
+	        va_list argptr;
+	        va_start(argptr, format);
+	        vfprintf(stderr, format, argptr);
+	        va_end(argptr);
+	}
 }
