@@ -553,8 +553,9 @@ int testSign
 		sign_arg_array[n].hashType = hashType;
 	}
 
-	log_notice("Creating %d signatures with %s using %d %s...\n",
-		   iterations, mechanism, threads, (threads > 1 ? "threads" : "thread"));
+	log_notice("Creating %d %s signatures using %d %s...\n",
+		   iterations * threads, mechanism,
+		   threads, (threads > 1 ? "threads" : "thread"));
 	gettimeofday(&start, NULL);
 
 	/* Create threads for signing */
