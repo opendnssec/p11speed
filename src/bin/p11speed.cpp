@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
 		CK_C_GetFunctionList pGetFunctionList = loadLibrary(module, &moduleHandle, &errMsg);
 		if (!pGetFunctionList)
 		{
-			log_error("Could not load the library: %s\n", errMsg);
+			log_fatal("Could not load the library: %s\n", errMsg);
 			exit(1);
 		}
 
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 		CK_RV p11rv = p11->C_Initialize((CK_VOID_PTR) &initArgs);
 		if (p11rv != CKR_OK)
 		{
-			log_error("Could not initialize the library.\n");
+			log_fatal("Could not initialize the library.\n");
 			exit(1);
 		}
 	}
