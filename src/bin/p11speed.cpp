@@ -985,3 +985,13 @@ void log_error (const char* format, ...)
         vfprintf(stderr, format, argptr);
         va_end(argptr);
 }
+
+void log_fatal (const char* format, ...)
+{
+	fprintf(stderr, "%ld: FATAL: ", time(NULL));
+
+        va_list argptr;
+        va_start(argptr, format);
+        vfprintf(stderr, format, argptr);
+        va_end(argptr);
+}

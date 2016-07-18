@@ -53,6 +53,7 @@ void* sign(void* arg);
 // Logging
 void log_notice(const char* format, ...);
 void log_error(const char* format, ...);
+void log_fatal(const char* format, ...);
 
 // Library
 static void* moduleHandle;
