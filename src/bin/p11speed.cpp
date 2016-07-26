@@ -38,6 +38,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <getopt.h>
 #include <string.h>
 #ifndef _WIN32
@@ -193,7 +194,7 @@ int main(int argc, char* argv[])
 		CK_C_GetFunctionList pGetFunctionList = loadLibrary(module, &moduleHandle, &errMsg);
 		if (!pGetFunctionList)
 		{
-			fprintf(stderr, "ERROR: Could not load the library: %s\n", errMsg);
+			log_fatal("Could not load the library: %s\n", errMsg);
 			exit(1);
 		}
 
@@ -205,7 +206,7 @@ int main(int argc, char* argv[])
 		CK_RV p11rv = p11->C_Initialize((CK_VOID_PTR) &initArgs);
 		if (p11rv != CKR_OK)
 		{
-			fprintf(stderr, "ERROR: Could not initialize the library.\n");
+			log_fatal("Could not initialize the library.\n");
 			exit(1);
 		}
 	}
@@ -221,20 +222,20 @@ int main(int argc, char* argv[])
 	{
 		if (slot == NULL)
 		{
-			fprintf(stderr, "ERROR: A slot number must be supplied. "
-					"Use --slot <number>\n");
+			log_error("A slot number must be supplied. "
+				  "Use --slot <number>\n");
 			return 1;
 		}
 		if (threads == NULL)
 		{
-			fprintf(stderr, "ERROR: The number of threads must be supplied. "
-					"Use --threads <number>\n");
+			log_error("The number of threads must be supplied. "
+				  "Use --threads <number>\n");
 			return 1;
 		}
 		if (iterations == NULL)
 		{
-			fprintf(stderr, "ERROR: The number of iterations must be supplied. "
-					"Use --iterations <number>\n");
+			log_error("The number of iterations must be supplied. "
+				  "Use --iterations <number>\n");
 			return 1;
 		}
 
@@ -259,21 +260,21 @@ int showSlots()
 	CK_RV rv = p11->C_GetSlotList(CK_FALSE, NULL_PTR, &ulSlotCount);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr, "ERROR: Could not get the number of slots.\n");
+		log_error("Could not get the number of slots.\n");
 		return 1;
 	}
 
 	CK_SLOT_ID_PTR pSlotList = (CK_SLOT_ID_PTR) malloc(ulSlotCount*sizeof(CK_SLOT_ID));
 	if (!pSlotList)
 	{
-		fprintf(stderr, "ERROR: Could not allocate memory.\n");
+		log_error("Could not allocate memory.\n");
 		return 1;
 	}
 
 	rv = p11->C_GetSlotList(CK_FALSE, pSlotList, &ulSlotCount);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr, "ERROR: Could not get the slot list.\n");
+		log_error("Could not get the slot list.\n");
 		free(pSlotList);
 		return 1;
 	}
@@ -288,7 +289,7 @@ int showSlots()
 		rv = p11->C_GetSlotInfo(pSlotList[i], &slotInfo);
 		if (rv != CKR_OK)
 		{
-			fprintf(stderr, "ERROR: Could not get info about slot %lu.\n", pSlotList[i]);
+			log_error("Could not get info about slot %lu.\n", pSlotList[i]);
 			continue;
 		}
 
@@ -313,8 +314,8 @@ int showSlots()
 		rv = p11->C_GetTokenInfo(pSlotList[i], &tokenInfo);
 		if (rv != CKR_OK)
 		{
-			fprintf(stderr, "ERROR: Could not get info about the token in slot %lu.\n",
-				pSlotList[i]);
+			log_error("Could not get info about the token in slot %lu.\n",
+				  pSlotList[i]);
 			continue;
 		}
 
@@ -385,8 +386,8 @@ int testSign
 
 	if (mechanism == NULL)
 	{
-		fprintf(stderr, "ERROR: A mechanism must be supplied. "
-				"Use --mechanism <mech>\n");
+		log_error("A mechanism must be supplied. "
+			  "Use --mechanism <mech>\n");
 		return 1;
 	}
 
@@ -397,18 +398,17 @@ int testSign
 	{
 		if (rv == CKR_SLOT_ID_INVALID)
 		{
-			fprintf(stderr, "ERROR: The given slot does not exist.\n");
+			log_error("The given slot does not exist.\n");
 		}
 		else if (rv == CKR_TOKEN_NOT_RECOGNIZED)
 		{
-			fprintf(stderr, "ERROR: The token in the given slot has "
-					"not been initialized.\n");
+			log_error("The token in the given slot has "
+				  "not been initialized.\n");
 		}
 		else
 		{
-			fprintf(stderr,
-				"C_OpenSession() returned error: rv=%X\n",
-				(unsigned int)rv);
+			log_error("C_OpenSession() returned error: rv=%X\n",
+				  (unsigned int)rv);
 		}
 		return 1;
 	}
@@ -423,33 +423,35 @@ int testSign
 	{
 		if (rv == CKR_PIN_INCORRECT)
 		{
-			fprintf(stderr, "ERROR: The given user PIN does not match "
-					"the one in the token.\n");
+			log_error("The given user PIN does not match "
+				  "the one in the token.\n");
 		}
 		else
 		{
-			fprintf(stderr,
-				"C_Login() returned error: rv=%X\n",
-				(unsigned int)rv);
+			log_error("C_Login() returned error: rv=%X\n",
+				  (unsigned int)rv);
 		}
 		return 1;
 	}
+
+	log_notice("Key generation started...\n");
+	gettimeofday(&start, NULL);
 
 	// Generate key
 	if (strcmp(mechanism, "RSA_PKCS") == 0)
 	{
 		if (keysize == NULL)
 		{
-			fprintf(stderr, "ERROR: A key size must be supplied. "
-					"Use --keysize <bits>\n");
+			log_error("A key size must be supplied. "
+				  "Use --keysize <bits>\n");
 			return 1;
 		}
 
 		bits = atoi(keysize);
 		if (bits < 1024 || bits > 4096)
 		{
-			fprintf(stderr, "ERROR: Invalid key size: "
-					"%i [1024-4096]\n", bits);
+			log_error("Invalid key size: "
+				  "%i [1024-4096]\n", bits);
 			return 1;
 		}
 
@@ -461,16 +463,16 @@ int testSign
 	{
 		if (keysize == NULL)
 		{
-			fprintf(stderr, "ERROR: A key size must be supplied. "
-					"Use --keysize <bits>\n");
+			log_error("A key size must be supplied. "
+				  "Use --keysize <bits>\n");
 			return 1;
 		}
 
 		bits = atoi(keysize);
 		if (bits < 1024 || bits > 4096)
 		{
-			fprintf(stderr, "ERROR: Invalid key size: "
-					"%i [1024-4096]\n", bits);
+			log_error("Invalid key size: "
+				  "%i [1024-4096]\n", bits);
 			return 1;
 		}
 
@@ -482,8 +484,8 @@ int testSign
 	{
 		if (keysize == NULL)
 		{
-			fprintf(stderr, "ERROR: A key size must be supplied. "
-					"Use --keysize <bits>\n");
+			log_error("A key size must be supplied. "
+				  "Use --keysize <bits>\n");
 			return 1;
 		}
 
@@ -498,8 +500,8 @@ int testSign
 		}
 		else
 		{
-			fprintf(stderr, "ERROR: Invalid key size: "
-					"%i [256, 384]\n", bits);
+			log_error("Invalid key size: "
+				  "%i [256, 384]\n", bits);
 			return 1;
 		}
 
@@ -515,12 +517,20 @@ int testSign
 	}
 	else
 	{
-		fprintf(stderr, "ERROR: Unknown signing mechanism. "
-				"Please edit --mechanism <mech> to correct the error.\n");
+		log_error("Unknown signing mechanism. "
+			  "Please edit --mechanism <mech> to correct the error.\n");
 		return 1;
 	}
 
 	if (result != 0) return result;
+
+	log_notice("Key generation done.\n");
+
+	gettimeofday(&end, NULL);
+	end.tv_sec -= start.tv_sec;
+	end.tv_usec-= start.tv_usec;
+	elapsed =(double)(end.tv_sec)+(double)(end.tv_usec)*.000001;
+	printf("Key generation took %.2f seconds.\n", elapsed);
 
 	/* Prepare threads */
 	pthread_attr_init(&thread_attr);
@@ -531,9 +541,8 @@ int testSign
 		rv = p11->C_OpenSession(slot, CKF_SERIAL_SESSION, NULL_PTR, NULL_PTR, &hSessionRO);
 		if (rv != CKR_OK)
 		{
-			fprintf(stderr,
-				"C_OpenSession() returned error: rv=%X\n",
-				(unsigned int)rv);
+			log_error("C_OpenSession() returned error: rv=%X\n",
+				  (unsigned int)rv);
 			return 1;
 		}
 
@@ -545,8 +554,9 @@ int testSign
 		sign_arg_array[n].hashType = hashType;
 	}
 
-	fprintf(stderr, "Creating %d signatures with %s using %d %s...\n",
-		iterations, mechanism, threads, (threads > 1 ? "threads" : "thread"));
+	log_notice("Creating %d %s signatures using %d %s...\n",
+		   iterations * threads, mechanism,
+		   threads, (threads > 1 ? "threads" : "thread"));
 	gettimeofday(&start, NULL);
 
 	/* Create threads for signing */
@@ -556,7 +566,7 @@ int testSign
 					sign, (void *) &sign_arg_array[n]);
 		if (result)
 		{
-			fprintf(stderr, "pthread_create() returned %d\n", result);
+			log_error("pthread_create() returned %d\n", result);
 			return 1;
 		}
 	}
@@ -567,7 +577,7 @@ int testSign
 		result = pthread_join(thread_array[n], &thread_status);
 		if (result)
 		{
-			fprintf(stderr, "pthread_join() returned %d\n", result);
+			log_error("pthread_join() returned %d\n", result);
 			return 1;
 		}
 	}
@@ -596,17 +606,15 @@ int testSign
 	rv = p11->C_DestroyObject(hSessionRW, hPublicKey);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr,
-			"C_DestroyObject() returned error: rv=%X\n",
-			(unsigned int)rv);
+		log_error("C_DestroyObject() returned error: rv=%X\n",
+			  (unsigned int)rv);
 		return 1;
 	}
 	rv = p11->C_DestroyObject(hSessionRW, hPrivateKey);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr,
-			"C_DestroyObject() returned error: rv=%X\n",
-			(unsigned int)rv);
+		log_error("C_DestroyObject() returned error: rv=%X\n",
+			  (unsigned int)rv);
 		return 1;
 	}
 
@@ -656,9 +664,8 @@ int generateRsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE &
 					  &hPuk, &hPrk);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr,
-			"C_GenerateKeyPair() returned error: rv=%X\n",
-			(unsigned int)rv);
+		log_error("C_GenerateKeyPair() returned error: rv=%X\n",
+			  (unsigned int)rv);
 		return 1;
 	}
 
@@ -720,9 +727,8 @@ int generateDsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE &
 				      &domainPar);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr,
-			"C_GenerateKey() returned error: rv=%X\n",
-			(unsigned int)rv);
+		log_error("C_GenerateKey() returned error: rv=%X\n",
+			  (unsigned int)rv);
 		return 1;
 	}
 
@@ -730,18 +736,16 @@ int generateDsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE &
 				      pukAttribs, 3);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr,
-			"C_GetAttributeValue() returned error: rv=%X\n",
-			(unsigned int)rv);
+		log_error("C_GetAttributeValue() returned error: rv=%X\n",
+			  (unsigned int)rv);
 		return 1;
 	}
 
 	rv = p11->C_DestroyObject(hSession, domainPar);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr,
-			"C_DestroyObject() returned error: rv=%X\n",
-			(unsigned int)rv);
+		log_error("C_DestroyObject() returned error: rv=%X\n",
+			  (unsigned int)rv);
 		return 1;
 	}
 
@@ -751,9 +755,8 @@ int generateDsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE &
 				    &hPuk, &hPrk);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr,
-			"C_GenerateKeyPair() returned error: rv=%X\n",
-			(unsigned int)rv);
+		log_error("C_GenerateKeyPair() returned error: rv=%X\n",
+			  (unsigned int)rv);
 		return 1;
 	}
 
@@ -810,7 +813,7 @@ int generateEcdsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE
 	}
 	else
 	{
-		fprintf(stderr, "generateEcdsa(): Invalid curve\n");
+		log_error("generateEcdsa(): Invalid curve\n");
 		return 1;
 	}
 
@@ -820,9 +823,8 @@ int generateEcdsa(CK_SESSION_HANDLE hSession, CK_ULONG keysize, CK_OBJECT_HANDLE
 					  &hPuk, &hPrk);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr,
-			"C_GenerateKeyPair() returned error: rv=%X\n",
-			(unsigned int)rv);
+		log_error("C_GenerateKeyPair() returned error: rv=%X\n",
+			  (unsigned int)rv);
 		return 1;
 	}
 
@@ -873,9 +875,8 @@ int generateGost(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE &hPuk, CK_OBJECT_H
 					  &hPuk, &hPrk);
 	if (rv != CKR_OK)
 	{
-		fprintf(stderr,
-			"C_GenerateKeyPair() returned error: rv=%X\n",
-			(unsigned int)rv);
+		log_error("C_GenerateKeyPair() returned error: rv=%X\n",
+			  (unsigned int)rv);
 		return 1;
 	}
 
@@ -935,16 +936,15 @@ void* sign (void* arg)
 	CK_BYTE signature[512];
 	CK_ULONG ulSignatureLen = 0;
 
-	fprintf(stderr, "Signer thread #%d started...\n", id);
+	log_notice("Signer thread #%d started...\n", id);
 
 	/* Do some signing */
 	for (i=0; i<iterations; i++) {
 		rv = p11->C_SignInit(hSession, &mechanism, hPrivateKey);
 		if (rv != CKR_OK)
 		{
-			fprintf(stderr,
-				"C_SignInit() returned error: rv=%X\n",
-				(unsigned int)rv);
+			log_error("C_SignInit() returned error: rv=%X\n",
+				  (unsigned int)rv);
 			break;
 		}
 
@@ -956,14 +956,43 @@ void* sign (void* arg)
 				 &ulSignatureLen);
 		if (rv != CKR_OK)
 		{
-			fprintf(stderr,
-				"C_Sign() returned error: rv=%X\n",
-				(unsigned int)rv);
+			log_error("C_Sign() returned error: rv=%X\n",
+				  (unsigned int)rv);
 			break;
 		}
 	}
 
-	fprintf(stderr, "Signer thread #%d done.\n", id);
+	log_notice("Signer thread #%d done.\n", id);
 
 	pthread_exit(NULL);
+}
+
+void log_notice (const char* format, ...)
+{
+	fprintf(stderr, "%ld: NOTICE: ", time(NULL));
+
+        va_list argptr;
+        va_start(argptr, format);
+        vfprintf(stderr, format, argptr);
+        va_end(argptr);
+}
+
+void log_error (const char* format, ...)
+{
+	fprintf(stderr, "%ld: ERROR: ", time(NULL));
+
+        va_list argptr;
+        va_start(argptr, format);
+        vfprintf(stderr, format, argptr);
+        va_end(argptr);
+}
+
+void log_fatal (const char* format, ...)
+{
+	fprintf(stderr, "%ld: FATAL: ", time(NULL));
+
+        va_list argptr;
+        va_start(argptr, format);
+        vfprintf(stderr, format, argptr);
+        va_end(argptr);
 }

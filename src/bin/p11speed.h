@@ -50,6 +50,11 @@ int generateGost(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE &hPuk, CK_OBJECT_H
 // Work items for threads
 void* sign(void* arg);
 
+// Logging
+void log_notice(const char* format, ...);
+void log_error(const char* format, ...);
+void log_fatal(const char* format, ...);
+
 // Library
 static void* moduleHandle;
 extern CK_FUNCTION_LIST_PTR p11;
